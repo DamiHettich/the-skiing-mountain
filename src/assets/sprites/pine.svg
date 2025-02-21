@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30" height="40" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tronco -->
+  <rect x="13" y="30" width="4" height="8" fill="#2d1810"/>
+  
+  <!-- Copa del árbol (más densa y oscura) -->
+  <path d="M15 2 L25 15 L5 15 Z" fill="#1E8449"/>
+  <path d="M15 8 L27 22 L3 22 Z" fill="#1E8449"/>
+  <path d="M15 15 L28 28 L2 28 Z" fill="#1E8449"/>
+  <path d="M15 22 L25 32 L5 32 Z" fill="#1E8449"/>
+</svg> 

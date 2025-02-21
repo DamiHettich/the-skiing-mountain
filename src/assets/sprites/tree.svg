@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30" height="40" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tronco -->
+  <rect x="13" y="30" width="4" height="8" fill="#3d2b1f"/>
+  
+  <!-- Copa del árbol (triángulos superpuestos) -->
+  <path d="M15 5 L25 20 L5 20 Z" fill="#1E8449"/>
+  <path d="M15 12 L25 25 L5 25 Z" fill="#1E8449"/>
+  <path d="M15 18 L25 30 L5 30 Z" fill="#1E8449"/>
+</svg> 

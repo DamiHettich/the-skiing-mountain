@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30" height="40" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Esquís -->
+  <path d="M5 35 L25 35 L23 38 L7 38" fill="#7F8C8D"/>
+  
+  <!-- Cuerpo -->
+  <path d="M12 15 L18 15 L20 32 L10 32 Z" fill="#2C3E50"/>
+  
+  <!-- Cabeza -->
+  <circle cx="15" cy="12" r="5" fill="#E0E0E0"/>
+  
+  <!-- Brazos -->
+  <path d="M12 18 L8 25" stroke="#E74C3C" stroke-width="2"/>
+  <path d="M18 18 L22 25" stroke="#E74C3C" stroke-width="2"/>
+</svg> 
