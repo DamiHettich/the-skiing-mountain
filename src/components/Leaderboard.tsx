@@ -3,13 +3,9 @@ import { HighScore } from '../types/game'
 
 interface LeaderboardProps {
   scores: HighScore[]
-  currentDistance: number
 }
 
-const Leaderboard: React.FC<LeaderboardProps> = ({
-  scores,
-  currentDistance
-}) => {
+const Leaderboard: React.FC<LeaderboardProps> = ({scores}) => {
   const sortedScores = scores
     .sort((a, b) => b.distance - a.distance)
     .slice(0, 10)
@@ -21,9 +17,6 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
           <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white">
             Top Scores
           </h2>
-          <p className="text-sm text-blue-400 mt-1">
-            Current Distance: <span className="font-mono">{Math.floor(currentDistance)}m</span>
-          </p>
         </div>
       </div>
 

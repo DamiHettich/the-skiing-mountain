@@ -1,4 +1,4 @@
-import GameCanvas from './components/Game/GameCanvas.tsx'
+import GameCanvas from './components/GameCanvas.tsx'
 
 function App() {
   return (
