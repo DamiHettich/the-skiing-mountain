@@ -24,13 +24,12 @@ const GameOverlay: React.FC<GameOverlayProps> = ({
     }
   }
 
-  // Initial name entry screen
   if (isInitial) {
     return (
       <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
         <div className="bg-gray-900/90 p-8 rounded-2xl shadow-2xl border border-blue-900/30 text-center">
           <h2 className="text-2xl font-bold mb-4 text-blue-400">
-            Enter your name to play
+            Ingresa tu nombre
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
@@ -45,7 +44,7 @@ const GameOverlay: React.FC<GameOverlayProps> = ({
               type="submit"
               className="block w-full bg-blue-900/50 hover:bg-blue-800/50 px-6 py-2 rounded-lg transition-all border border-blue-900 text-blue-400"
             >
-              Play
+              Jugar
             </button>
           </form>
         </div>
@@ -53,14 +52,12 @@ const GameOverlay: React.FC<GameOverlayProps> = ({
     )
   }
 
-  // Game over or victory screen
   if (gameState.gameStatus === 'lost') {
-    console.log('showing game over')
     return (
       <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
         <div className="bg-gray-900/90 p-8 rounded-2xl shadow-2xl border border-blue-900/30 text-center">
           <h2 className="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white">
-            Game Over
+            Perdiste u.u
           </h2>
           <p className="text-blue-400 mb-6">
             Distancia: <span className="font-mono">{Math.floor(gameState.distance)}m</span>

@@ -132,7 +132,6 @@ export const useGameState = (
             acceleration: GAME_CONSTANTS.MONSTER_ACCELERATION
           },
           gameStatus: 'waiting',
-          finishLine: GAME_CONSTANTS.FINISH_LINE_DISTANCE,
           playerName: playerName
         }
 
@@ -153,7 +152,7 @@ export const useGameState = (
     const newStatus: GameStatus = 
       !isStarted ? 'waiting' :
       isPaused ? 'paused' :
-      currentStatus === 'won' || currentStatus === 'lost' ? currentStatus :
+      currentStatus === 'lost' ? currentStatus :
       'playing'
 
     if (newStatus !== currentStatus) {

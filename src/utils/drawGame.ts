@@ -69,16 +69,5 @@ export function drawGame(gameState: GameState) {
   ctx.fillStyle = '#FFFFFF'
   ctx.font = '20px Arial'
   ctx.textAlign = 'left'
-  ctx.fillText(`Distance: ${Math.floor(gameState.distance)}m`, 20, 30)
-
-  // Draw finish line if in view
-  if (GAME_CONSTANTS.FINISH_LINE_DISTANCE - gameState.distance < canvas.height) {
-    ctx.fillStyle = '#FFFF00'
-    ctx.fillRect(
-      GAME_CONSTANTS.PLAYABLE_MARGIN_X,
-      canvas.height - (GAME_CONSTANTS.FINISH_LINE_DISTANCE - gameState.distance),
-      canvas.width - 2 * GAME_CONSTANTS.PLAYABLE_MARGIN_X,
-      10
-    )
-  }
+  ctx.fillText(`Distancia: ${Math.floor(gameState.distance)}m`, 20, 30)
 } 

@@ -24,7 +24,7 @@ export interface Monster {
   acceleration: number
 }
 
-export type GameStatus = 'playing' | 'won' | 'lost' | 'paused' | 'waiting'
+export type GameStatus = 'playing' | 'lost' | 'paused' | 'waiting'
 
 export interface GameState {
   canvas: HTMLCanvasElement
@@ -56,7 +56,6 @@ export interface GameState {
   highScores: HighScore[]
   monster: Monster
   gameStatus: GameStatus
-  finishLine: number
   playerName: string | null
 }
 
@@ -81,7 +80,6 @@ export const GAME_CONSTANTS = {
   MONSTER_ACCELERATION: 0.0001,
   MONSTER_INITIAL_DISTANCE: 300,
   MONSTER_HORIZONTAL_FOLLOW: 0.03,
-  FINISH_LINE_DISTANCE: 5000,
 } as const
 
 // Constantes para el sistema de puntuación
