@@ -24,6 +24,8 @@ export interface Monster {
   acceleration: number
 }
 
+export type GameStatus = 'playing' | 'won' | 'lost' | 'paused' | 'waiting'
+
 export interface GameState {
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
@@ -53,7 +55,7 @@ export interface GameState {
   distance: number
   highScores: HighScore[]
   monster: Monster
-  gameStatus: 'playing' | 'won' | 'lost'
+  gameStatus: GameStatus
   finishLine: number
   playerName: string | null
 }
