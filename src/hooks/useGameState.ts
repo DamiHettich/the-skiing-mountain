@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { GAME_CONSTANTS, GameState, Obstacle, HighScore } from '../types/game.ts'
+import { GAME_CONSTANTS, GameState, Obstacle, HighScore, GameStatus } from '../types/game.ts'
 import skierSvg from '../assets/sprites/skier.svg'
 import treeSvg from '../assets/sprites/tree.svg'
 import pineSvg from '../assets/sprites/pine.svg'
@@ -9,8 +9,8 @@ const INITIAL_OBSTACLES: Obstacle[] = Array.from({ length: 20 }, () => ({
   x: GAME_CONSTANTS.PLAYABLE_MARGIN_X + 
      Math.random() * (GAME_CONSTANTS.CANVAS_WIDTH - 2 * GAME_CONSTANTS.PLAYABLE_MARGIN_X - GAME_CONSTANTS.TREE_SIZE),
   y: Math.random() * GAME_CONSTANTS.CANVAS_HEIGHT,
-  width: GAME_CONSTANTS.TREE_SIZE * 1.2,
-  height: GAME_CONSTANTS.TREE_SIZE * 1.2,
+  width: GAME_CONSTANTS.TREE_SIZE,
+  height: GAME_CONSTANTS.TREE_SIZE,
   isBorder: false
 }))
 
@@ -27,8 +27,8 @@ const INITIAL_BORDER_TREES: Obstacle[] = (() => {
       trees.push({
         x: baseX + Math.floor(Math.random() * (GAME_CONSTANTS.PLAYABLE_MARGIN_X - GAME_CONSTANTS.TREE_SIZE)),
         y,
-        width: GAME_CONSTANTS.TREE_SIZE,
-        height: GAME_CONSTANTS.TREE_SIZE,
+        width: GAME_CONSTANTS.TREE_SIZE*1.3,
+        height: GAME_CONSTANTS.TREE_SIZE*1.3,
         isBorder: true
       })
     }
@@ -50,7 +50,11 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 const loadHighScores = (): HighScore[] => {
   const saved = localStorage.getItem('skiHighScores')
   if (saved) {
-    return JSON.parse(saved)
+    try {
+      return JSON.parse(saved)
+    } catch {
+      return []
+    }
   }
   return []
 }
@@ -58,11 +62,14 @@ const loadHighScores = (): HighScore[] => {
 export const useGameState = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   isStarted: boolean,
-  isPaused: boolean
-) => {
+  isPaused: boolean,
+  playerName: string
+): GameState | null => {
   const [gameState, setGameState] = useState<GameState | null>(null)
+  const [spritesLoaded, setSpritesLoaded] = useState(false)
 
-  // Initialize game state when canvas is available
+
+  // Initialize game state
   useEffect(() => {
     async function initGame() {
       const canvas = canvasRef.current
@@ -71,77 +78,91 @@ export const useGameState = (
       const ctx = canvas.getContext('2d')
       if (!ctx) return
 
-      // Load sprites
-      const [playerSprite, treeSprite, borderTreeSprite, yetiSprite] = await Promise.all<HTMLImageElement>([
-        loadImage(skierSvg),
-        loadImage(treeSvg),
-        loadImage(pineSvg),
-        loadImage(yetiSvg)
-      ])
+      try {
+        const [playerSprite, treeSprite, borderTreeSprite, yetiSprite] = await Promise.all([
+          loadImage(skierSvg),
+          loadImage(treeSvg),
+          loadImage(pineSvg),
+          loadImage(yetiSvg)
+        ])
 
-      setGameState({
-        canvas,
-        ctx,
-        player: {
-          x: canvas.width / 2,
-          y: 50,
-          width: 20,
-          height: 30,
-          speed: 2.5,
-        },
-        obstacles: [...INITIAL_OBSTACLES],
-        borderTrees: [...INITIAL_BORDER_TREES],
-        score: 0,
-        hasCollided: false,
-        baseSpeed: 0.5,
-        currentSpeed: 0.5,
-        maxSpeed: 2,
-        acceleration: 0.005,
-        deceleration: 1.5,
-        keys: {
-          left: false,
-          right: false
-        },
-        horizontalSpeed: 0,
-        maxHorizontalSpeed: 8,
-        sprites: {
-          player: playerSprite,
-          tree: treeSprite,
-          borderTree: borderTreeSprite,
-          yeti: yetiSprite
-        },
-        playerAngle: 0,
-        distance: 0,
-        highScores: loadHighScores(),
-        monster: {
-          x: canvas.width / 2,
-          y: -GAME_CONSTANTS.MONSTER_INITIAL_DISTANCE,
-          width: GAME_CONSTANTS.MONSTER_WIDTH,
-          height: GAME_CONSTANTS.MONSTER_HEIGHT,
-          speed: GAME_CONSTANTS.MONSTER_BASE_SPEED,
-          baseSpeed: GAME_CONSTANTS.MONSTER_BASE_SPEED,
-          acceleration: GAME_CONSTANTS.MONSTER_ACCELERATION
-        },
-        gameStatus: 'playing',
-        finishLine: GAME_CONSTANTS.FINISH_LINE_DISTANCE,
-        playerName: null
-      })
+        setSpritesLoaded(true)
+
+        const initialState: GameState = {
+          canvas,
+          ctx,
+          player: {
+            x: canvas.width / 2,
+            y: 50,
+            width: 20,
+            height: 30,
+            speed: 2.5,
+          },
+          obstacles: [...INITIAL_OBSTACLES],
+          borderTrees: [...INITIAL_BORDER_TREES],
+          score: 0,
+          hasCollided: false,
+          baseSpeed: 0.5,
+          currentSpeed: 0.5,
+          maxSpeed: 2,
+          acceleration: 0.005,
+          deceleration: 1.5,
+          keys: {
+            left: false,
+            right: false
+          },
+          horizontalSpeed: 0,
+          maxHorizontalSpeed: 8,
+          sprites: {
+            player: playerSprite,
+            tree: treeSprite,
+            borderTree: borderTreeSprite,
+            yeti: yetiSprite
+          },
+          playerAngle: 0,
+          distance: 0,
+          highScores: loadHighScores(),
+          monster: {
+            x: canvas.width / 2,
+            y: -GAME_CONSTANTS.MONSTER_INITIAL_DISTANCE,
+            width: GAME_CONSTANTS.MONSTER_WIDTH,
+            height: GAME_CONSTANTS.MONSTER_HEIGHT,
+            speed: GAME_CONSTANTS.MONSTER_BASE_SPEED,
+            baseSpeed: GAME_CONSTANTS.MONSTER_BASE_SPEED,
+            acceleration: GAME_CONSTANTS.MONSTER_ACCELERATION
+          },
+          gameStatus: 'waiting',
+          finishLine: GAME_CONSTANTS.FINISH_LINE_DISTANCE,
+          playerName: playerName
+        }
+
+        setGameState(initialState)
+      } catch (error) {
+        console.error('Error loading game assets:', error)
+      }
     }
 
     initGame()
-  }, [canvasRef]) // Changed from [canvasRef.current] to [canvasRef]
+  }, [canvasRef, playerName])
 
-  // Update game state based on isStarted and isPaused
+  // Handle game status changes
   useEffect(() => {
-    if (!isStarted || isPaused) {
-      // Don't update state, game loop will handle pausing
-      return;
+    if (!gameState || !spritesLoaded) return
+
+    const currentStatus = gameState.gameStatus
+    const newStatus: GameStatus = 
+      !isStarted ? 'waiting' :
+      isPaused ? 'paused' :
+      currentStatus === 'won' || currentStatus === 'lost' ? currentStatus :
+      'playing'
+
+    if (newStatus !== currentStatus) {
+      setGameState(prev => ({
+        ...prev!,
+        gameStatus: newStatus
+      }))
     }
-    
-    if (gameState && gameState.gameStatus === 'playing') {
-      setGameState(prev => ({...prev!}));
-    }
-  }, [isStarted, isPaused, gameState]);
+  }, [isStarted, isPaused, spritesLoaded, gameState])
 
   return gameState
 } 

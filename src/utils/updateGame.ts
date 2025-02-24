@@ -1,7 +1,9 @@
 import { GameState, GAME_CONSTANTS, SCORE_CONSTANTS } from '../types/game'
 import { handleGameOver } from './gameOver'
 
-export function updateGame(gameState: GameState) {
+export function updateGame(
+  gameState: GameState
+) {
   if (gameState.gameStatus !== 'playing') return
 
   // Handle horizontal movement with acceleration
@@ -46,39 +48,18 @@ export function updateGame(gameState: GameState) {
     y: tree.y - gameState.currentSpeed
   }))
 
-  // Generate border trees if needed (more gradually)
-  if (gameState.borderTrees.length < 120) { // Increased for better coverage
-    // Add one column of trees on each side per frame
-    const leftX = Math.floor(Math.random() * (GAME_CONSTANTS.PLAYABLE_MARGIN_X - GAME_CONSTANTS.TREE_SIZE))
-    const rightX = gameState.canvas.width - GAME_CONSTANTS.PLAYABLE_MARGIN_X + 
-                  Math.floor(Math.random() * (GAME_CONSTANTS.PLAYABLE_MARGIN_X - GAME_CONSTANTS.TREE_SIZE))
+  // Clean up off-screen trees more aggressively
+  gameState.obstacles = gameState.obstacles.filter(
+    obstacle => obstacle.y > -100 && obstacle.y < gameState.canvas.height + 200
+  )
+  gameState.borderTrees = gameState.borderTrees.filter(
+    tree => tree.y > -100 && tree.y < gameState.canvas.height + 200
+  )
 
-    // Add a column of trees at each X position
-    for (let yOffset = 0; yOffset < 300; yOffset += GAME_CONSTANTS.TREE_SIZE) {
-      // Left side tree
-      gameState.borderTrees.push({
-        x: leftX,
-        y: gameState.canvas.height + yOffset,
-        width: GAME_CONSTANTS.TREE_SIZE,
-        height: GAME_CONSTANTS.TREE_SIZE,
-        isBorder: true
-      })
-
-      // Right side tree
-      gameState.borderTrees.push({
-        x: rightX,
-        y: gameState.canvas.height + yOffset,
-        width: GAME_CONSTANTS.TREE_SIZE,
-        height: GAME_CONSTANTS.TREE_SIZE,
-        isBorder: true
-      })
-    }
-  }
-
-  // Generate actual obstacles in the playable area
-  if (gameState.obstacles.length < 25) {
-    // Añadir 2-3 árboles a la vez para crear grupos más densos
-    const treesToAdd = Math.floor(Math.random() * 2) + 2 // 2 o 3 árboles
+  // Generate new trees only when needed
+  const minTrees = 15
+  if (gameState.obstacles.length < minTrees) {
+    const treesToAdd = Math.min(3, minTrees - gameState.obstacles.length)
     
     for (let i = 0; i < treesToAdd; i++) {
       const baseX = GAME_CONSTANTS.PLAYABLE_MARGIN_X + 
@@ -86,21 +67,29 @@ export function updateGame(gameState: GameState) {
       
       gameState.obstacles.push({
         x: baseX + (Math.random() * 40 - 20),
-        y: gameState.canvas.height + Math.random() * 200,
-        width: GAME_CONSTANTS.TREE_SIZE * 1.2,  // 20% más grande visualmente
-        height: GAME_CONSTANTS.TREE_SIZE * 1.2,
+        y: gameState.canvas.height + Math.random() * 100,
+        width: GAME_CONSTANTS.TREE_SIZE,
+        height: GAME_CONSTANTS.TREE_SIZE,
         isBorder: false
       })
     }
   }
 
-  // Clean up off-screen trees and obstacles
-  gameState.obstacles = gameState.obstacles.filter(
-    obstacle => obstacle.y > -50
-  )
-  gameState.borderTrees = gameState.borderTrees.filter(
-    tree => tree.y > -50
-  )
+  // Generate border trees more efficiently
+  const minBorderTrees = 40
+  if (gameState.borderTrees.length < minBorderTrees) {
+    for (let side = 0; side < 2; side++) {
+      const baseX = side === 0 ? 0 : gameState.canvas.width - GAME_CONSTANTS.PLAYABLE_MARGIN_X
+      
+      gameState.borderTrees.push({
+        x: baseX + Math.floor(Math.random() * (GAME_CONSTANTS.PLAYABLE_MARGIN_X - GAME_CONSTANTS.TREE_SIZE)),
+        y: gameState.canvas.height + Math.random() * 100,
+        width: GAME_CONSTANTS.TREE_SIZE*1.4,
+        height: GAME_CONSTANTS.TREE_SIZE*1.4,
+        isBorder: true
+      })
+    }
+  }
 
   // Move player down slowly when not colliding
   if (!gameState.hasCollided) {
@@ -179,12 +168,15 @@ export function updateGame(gameState: GameState) {
     playerHitbox.y + playerHitbox.height > monsterHitbox.y
   ) {
     gameState.gameStatus = 'lost'
+    //updateGameStatus('lost')
     handleGameOver(gameState)
+    return
   }
 
   // Verificar victoria (llegada a la meta)
   if (gameState.distance >= GAME_CONSTANTS.FINISH_LINE_DISTANCE) {
     gameState.gameStatus = 'won'
+    //updateGameStatus('won')
     handleGameOver(gameState)
   }
 } 
