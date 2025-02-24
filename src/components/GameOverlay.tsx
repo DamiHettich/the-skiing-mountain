@@ -37,7 +37,7 @@ const GameOverlay: React.FC<GameOverlayProps> = ({
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               className="bg-gray-800 border border-blue-900 text-blue-400 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500"
-              placeholder="Your name"
+              placeholder="Mi nombre"
               maxLength={15}
             />
             <button

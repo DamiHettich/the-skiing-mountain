@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { useGameState } from '../hooks/useGameState'
 import { useGameLoop } from '../hooks/useGameLoop'
+import { getPlayerName, savePlayerName } from '../utils/playerStorage';
 import Leaderboard from './Leaderboard'
 import GameOverlay from './GameOverlay'
 
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [playerName, setPlayerName] = useState('')
-  const [isStarted, setIsStarted] = useState(false)
+  const [playerName, setPlayerName] = useState<string>(getPlayerName() || '');
+  const [isStarted, setIsStarted] = useState(!!playerName)
   const [isPaused, setIsPaused] = useState(false)
   
   const [gameState, setGameState] = useGameState(canvasRef, isStarted, isPaused, playerName)
@@ -33,9 +34,9 @@ const GameCanvas: React.FC = () => {
 
   const handleNameSubmit = useCallback((name: string) => {
     setPlayerName(name)
+    savePlayerName(name);
     setIsStarted(true)
   }, [])
-  console.log('gameStatus', gameState?.gameStatus)
 
   return (
     <div className="relative flex flex-col lg:flex-row items-start justify-center gap-8 p-8">
@@ -74,6 +75,11 @@ const GameCanvas: React.FC = () => {
       <div className="w-full lg:w-80">
         <Leaderboard
           scores={gameState?.highScores ?? []}
+          playerName={playerName}
+          onChangeName={(name) => {
+            setPlayerName(name);
+            savePlayerName(name);
+          }}
         />
       </div>
     </div>
