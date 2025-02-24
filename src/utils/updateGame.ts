@@ -1,8 +1,9 @@
-import { GameState, GAME_CONSTANTS, SCORE_CONSTANTS } from '../types/game'
+import { GameState, GAME_CONSTANTS, SCORE_CONSTANTS, GameStatus } from '../types/game'
 import { handleGameOver } from './gameOver'
 
 export function updateGame(
-  gameState: GameState
+  gameState: GameState,
+  setGameState: React.Dispatch<React.SetStateAction<GameState | null>>
 ) {
   if (gameState.gameStatus !== 'playing') return
 
@@ -167,16 +168,15 @@ export function updateGame(
     playerHitbox.y < monsterHitbox.y + monsterHitbox.height &&
     playerHitbox.y + playerHitbox.height > monsterHitbox.y
   ) {
-    gameState.gameStatus = 'lost'
-    //updateGameStatus('lost')
-    handleGameOver(gameState)
-    return
-  }
-
-  // Verificar victoria (llegada a la meta)
-  if (gameState.distance >= GAME_CONSTANTS.FINISH_LINE_DISTANCE) {
-    gameState.gameStatus = 'won'
-    //updateGameStatus('won')
-    handleGameOver(gameState)
+    setGameState(prevState => {
+      if (!prevState) return null;
+      const updatedState = {
+        ...prevState,
+        gameStatus: 'lost' as GameStatus
+      };
+      handleGameOver(updatedState);
+      return updatedState;
+    });
+    return;
   }
 } 

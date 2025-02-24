@@ -5,7 +5,8 @@ import { updateGame } from '../utils/updateGame.ts'
 import { checkCollisions } from '../utils/checkCollisions.ts'
 
 export const useGameLoop = (
-  gameState: GameState | null
+  gameState: GameState | null,
+  setGameState: React.Dispatch<React.SetStateAction<GameState | null>>
 ) => {
   useEffect(() => {
     if (!gameState) return
@@ -40,7 +41,7 @@ export const useGameLoop = (
 
     function gameLoop() {
       if (gameState?.gameStatus === 'playing') {
-        updateGame(gameState)
+        updateGame(gameState, setGameState)
         checkCollisions(gameState)
         drawGame(gameState)
       }
@@ -54,5 +55,5 @@ export const useGameLoop = (
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [gameState])
+  }, [gameState, setGameState])
 } 

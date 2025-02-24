@@ -10,9 +10,9 @@ const GameCanvas: React.FC = () => {
   const [isStarted, setIsStarted] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   
-  const gameState = useGameState(canvasRef, isStarted, isPaused, playerName)
+  const [gameState, setGameState] = useGameState(canvasRef, isStarted, isPaused, playerName)
   
-  useGameLoop(gameState)
+  useGameLoop(gameState, setGameState)
   
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'p' || e.key === 'P') {

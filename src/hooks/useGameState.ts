@@ -64,7 +64,7 @@ export const useGameState = (
   isStarted: boolean,
   isPaused: boolean,
   playerName: string
-): GameState | null => {
+): [GameState | null, React.Dispatch<React.SetStateAction<GameState | null>>] => {
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [spritesLoaded, setSpritesLoaded] = useState(false)
 
@@ -164,5 +164,5 @@ export const useGameState = (
     }
   }, [isStarted, isPaused, spritesLoaded, gameState])
 
-  return gameState
+  return [gameState, setGameState]
 } 
