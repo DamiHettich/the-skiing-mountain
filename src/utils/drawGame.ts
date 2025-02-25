@@ -9,6 +9,7 @@ export function drawGame(gameState: GameState) {
   
   // Draw game elements
   drawSnowArea(ctx, canvas)
+  drawStartLine(gameState)
   drawTrees(gameState)
   drawPlayer(gameState)
   drawMonster(gameState)
@@ -30,6 +31,22 @@ function drawSnowArea(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) 
     canvas.width - 2 * GAME_CONSTANTS.PLAYABLE_MARGIN_X,
     canvas.height
   )
+}
+
+function drawStartLine(gameState: GameState) {
+  const { ctx, startLine } = gameState;
+  
+  if (startLine && startLine.y > -50 && startLine.y < gameState.canvas.height + 50) {
+    // Draw start line
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(startLine.x, startLine.y, startLine.width, 5);
+    
+    // Draw start text
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('PARTIDA', gameState.canvas.width / 2, startLine.y - 10);
+  }
 }
 
 function drawTrees(gameState: GameState) {

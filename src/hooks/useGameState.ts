@@ -5,7 +5,7 @@ import treeSvg from '../assets/sprites/tree.svg'
 import pineSvg from '../assets/sprites/pine.svg'
 import yetiSvg from '../assets/sprites/yeti.svg'
 
-const INITIAL_OBSTACLES: Obstacle[] = Array.from({ length: 20 }, () => ({
+const INITIAL_OBSTACLES: Obstacle[] = Array.from({ length: 6}, () => ({
   x: GAME_CONSTANTS.PLAYABLE_MARGIN_X + 
      Math.random() * (GAME_CONSTANTS.CANVAS_WIDTH - 2 * GAME_CONSTANTS.PLAYABLE_MARGIN_X - GAME_CONSTANTS.TREE_SIZE),
   y: Math.random() * GAME_CONSTANTS.CANVAS_HEIGHT,
@@ -166,7 +166,12 @@ function createInitialGameState(
     highScores: loadHighScores(),
     monster: createMonsterState(canvas),
     gameStatus: 'waiting',
-    playerName
+    playerName,
+    startLine: {
+      y: 150, // Position just below the player
+      width: canvas.width - 2 * GAME_CONSTANTS.PLAYABLE_MARGIN_X,
+      x: GAME_CONSTANTS.PLAYABLE_MARGIN_X
+    }
   }
 }
 

@@ -57,6 +57,11 @@ export interface GameState {
   monster: Monster
   gameStatus: GameStatus
   playerName: string | null
+  startLine: {
+    y: number
+    width: number
+    x: number
+  }
 }
 
 export interface HighScore {

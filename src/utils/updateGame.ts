@@ -75,6 +75,11 @@ function updateTrees(gameState: GameState) {
     y: tree.y - gameState.currentSpeed
   }))
 
+  // Move the start line up with everything else
+  if (gameState.startLine) {
+    gameState.startLine.y -= gameState.currentSpeed;
+  }
+
   // Clean up off-screen trees
   gameState.obstacles = gameState.obstacles.filter(
     obstacle => obstacle.y > -100 && obstacle.y < gameState.canvas.height + 200
@@ -86,7 +91,7 @@ function updateTrees(gameState: GameState) {
 
 function generateObstacleTrees(gameState: GameState) {
   // Generate new obstacle trees
-  const minTrees = 15 + Math.floor(gameState.distance / 60);
+  const minTrees = 15 + Math.floor(gameState.distance / 30);
   if (gameState.obstacles.length < minTrees) {
     const treesToAdd = Math.min(5, minTrees - gameState.obstacles.length);
     
@@ -155,7 +160,7 @@ function updateMonster(gameState: GameState, setGameState: React.Dispatch<React.
     monster.baseSpeed + (gameState.distance * 0.0001)
   )
   const monsterSpeedMultiplier = 
-    playerSpeedFactor < 0.7 ? 1 : 0.9;
+    playerSpeedFactor < 0.7 ? 1 : 0.8;
 
   monster.speed = monster.speed + (targetSpeed * monsterSpeedMultiplier - monster.speed) * 0.05;
 
