@@ -46,11 +46,12 @@ const GameCanvas: React.FC = () => {
           width={800}
           height={600}
           className="border border-blue-900/30 rounded-2xl"
+          style={{ maxWidth: '100%', aspectRatio: '4/3' }}
         />
 
         {isPaused && (
           <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-            <p className="text-2xl text-blue-400">PAUSED</p>
+            <p className="text-2xl text-blue-400">PAUSADO</p>
           </div>
         )}
 
