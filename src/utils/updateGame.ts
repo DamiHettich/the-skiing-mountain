@@ -19,6 +19,8 @@ export function updateGame(
     )
   }
 
+  console.log(gameState.currentSpeed)
+
 
   generateObstacleTrees(gameState);
   generateBorderTrees(gameState);
@@ -31,7 +33,7 @@ export function updateGame(
 // Helper functions
 
 function updatePlayerMovement(gameState: GameState) {
-  const acceleration = 0.1;
+  const acceleration = 0.2;
   const friction = 0.85;
 
   if (gameState.keys.left) {
@@ -91,7 +93,7 @@ function updateTrees(gameState: GameState) {
 
 function generateObstacleTrees(gameState: GameState) {
   // Generate new obstacle trees
-  const minTrees = 15 + Math.floor(gameState.distance / 30);
+  const minTrees = Math.min(15 + Math.floor(gameState.distance / 80), 100);
   if (gameState.obstacles.length < minTrees) {
     const treesToAdd = Math.min(5, minTrees - gameState.obstacles.length);
     
@@ -101,7 +103,7 @@ function generateObstacleTrees(gameState: GameState) {
       
       gameState.obstacles.push({
         x: baseX + (Math.random() * 40 - 20),
-        y: gameState.canvas.height + Math.random() * 100,
+        y: gameState.canvas.height + Math.random() * 300,
         width: GAME_CONSTANTS.TREE_SIZE,
         height: GAME_CONSTANTS.TREE_SIZE,
         isBorder: false
@@ -151,31 +153,24 @@ function updatePlayerAngle(gameState: GameState) {
 
 function updateMonster(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState | null>>) {
   const monster = gameState.monster
-  
-  const playerSpeedFactor = gameState.currentSpeed / gameState.maxSpeed;
-  
-  // Calculate target speed - slower than player when player is at full speed
-  const targetSpeed = Math.min(
-    gameState.baseSpeed * 1.1,
-    monster.baseSpeed + (gameState.distance * 0.0001)
-  )
-  const monsterSpeedMultiplier = 
-    playerSpeedFactor < 0.7 ? 1 : 0.8;
-
-  monster.speed = monster.speed + (targetSpeed * monsterSpeedMultiplier - monster.speed) * 0.05;
+  if (gameState.currentSpeed > 2.5) {
+    monster.speed = 0.1
+  } else {
+    monster.speed = Math.min(
+      monster.maxSpeed,
+      monster.speed + monster.acceleration
+    )
+  }
 
   const dx = gameState.player.x - monster.x
   monster.x += dx * GAME_CONSTANTS.MONSTER_HORIZONTAL_FOLLOW
 
-  if (monster.y < gameState.player.y - 200) {
-    monster.y += monster.speed * 2
-  } else if (monster.y > gameState.player.y - 100) {
-    monster.y += monster.speed * 0.7
+  if (monster.y > gameState.player.y - 20) {
+    monster.y += monster.speed * 0.8
   } else {
     monster.y += monster.speed;
   }
 
-  // Check for collision with monster
   checkMonsterCollision(gameState, setGameState);
 }
 

@@ -22,6 +22,7 @@ export interface Monster {
   speed: number
   baseSpeed: number
   acceleration: number
+  maxSpeed: number
 }
 
 export type GameStatus = 'playing' | 'lost' | 'paused' | 'waiting'
@@ -71,7 +72,7 @@ export interface HighScore {
 }
 
 export const GAME_CONSTANTS = {
-  PLAYABLE_MARGIN_X: 100, // Margen desde los bordes
+  PLAYABLE_MARGIN_X: 100,
   TREE_SIZE: 40,
   PLAYER_WIDTH: 30,
   PLAYER_HEIGHT: 40,
@@ -82,13 +83,16 @@ export const GAME_CONSTANTS = {
   MONSTER_WIDTH: 50,
   MONSTER_HEIGHT: 50,
   MONSTER_BASE_SPEED: 0.05,
-  MONSTER_ACCELERATION: 0.0001,
+  MONSTER_ACCELERATION: 0.00001,
   MONSTER_INITIAL_DISTANCE: 300,
   MONSTER_HORIZONTAL_FOLLOW: 0.03,
+  MONSTER_MAX_SPEED: 0.1,
+  START_LINE_Y: 150,
+  START_LINE_WIDTH: 800 - 2 * 100,
+  START_LINE_X: 100
 } as const
 
-// Constantes para el sistema de puntuación
 export const SCORE_CONSTANTS = {
-  DISTANCE_MULTIPLIER: 0.1, // Para convertir la velocidad en distancia
-  MAX_HIGH_SCORES: 5 // Número de puntuaciones altas a mantener
+  DISTANCE_MULTIPLIER: 0.1,
+  MAX_HIGH_SCORES: 5
 } as const 

@@ -154,8 +154,8 @@ function createInitialGameState(
     hasCollided: false,
     baseSpeed: 0.5,
     currentSpeed: 0.5,
-    maxSpeed: 2,
-    acceleration: 0.005,
+    maxSpeed: 3,
+    acceleration: 0.001,
     deceleration: 1.5,
     keys: { left: false, right: false },
     horizontalSpeed: 0,
@@ -181,7 +181,7 @@ function createPlayerState(canvas: HTMLCanvasElement) {
     y: 50,
     width: 20,
     height: 30,
-    speed: 2.5,
+    speed: 5,
   }
 }
 
@@ -192,6 +192,7 @@ function createMonsterState(canvas: HTMLCanvasElement) {
     width: GAME_CONSTANTS.MONSTER_WIDTH,
     height: GAME_CONSTANTS.MONSTER_HEIGHT,
     speed: GAME_CONSTANTS.MONSTER_BASE_SPEED,
+    maxSpeed: GAME_CONSTANTS.MONSTER_MAX_SPEED,
     baseSpeed: GAME_CONSTANTS.MONSTER_BASE_SPEED,
     acceleration: GAME_CONSTANTS.MONSTER_ACCELERATION
   }
