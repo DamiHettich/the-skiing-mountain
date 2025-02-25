@@ -47,11 +47,9 @@ export function checkCollisions(gameState: GameState) {
   })
 
   if (isCurrentlyColliding && !gameState.hasCollided) {
-    console.log('Collision detected!')
     gameState.hasCollided = true
   } else if (!isCurrentlyColliding) {
     gameState.hasCollided = false
-    // Accelerate only when not colliding
     gameState.currentSpeed = Math.min(
       gameState.maxSpeed,
       gameState.currentSpeed + gameState.acceleration

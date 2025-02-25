@@ -2,13 +2,27 @@ import { GameState } from '../types/game'
 import { GAME_CONSTANTS } from '../types/game'
 
 export function drawGame(gameState: GameState) {
-  const { ctx, canvas, player, obstacles, borderTrees, sprites, playerAngle } = gameState
+  const { ctx, canvas } = gameState
 
-  // Clear only the necessary area
+  // Clear canvas
+  clearCanvas(ctx, canvas)
+  
+  // Draw game elements
+  drawSnowArea(ctx, canvas)
+  drawTrees(gameState)
+  drawPlayer(gameState)
+  drawMonster(gameState)
+  drawUI(gameState)
+}
+
+// Helper functions that can be tested independently
+
+function clearCanvas(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
   ctx.fillStyle = '#1a1a1a'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
 
-  // Draw snow area
+function drawSnowArea(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
   ctx.fillStyle = '#2c2c2c'
   ctx.fillRect(
     GAME_CONSTANTS.PLAYABLE_MARGIN_X,
@@ -16,8 +30,12 @@ export function drawGame(gameState: GameState) {
     canvas.width - 2 * GAME_CONSTANTS.PLAYABLE_MARGIN_X,
     canvas.height
   )
+}
 
-  // Draw only visible trees
+function drawTrees(gameState: GameState) {
+  const { ctx, canvas, obstacles, borderTrees, sprites } = gameState
+  
+  // Get only visible trees for performance
   const visibleTrees = [...borderTrees, ...obstacles].filter(tree => 
     tree.y > -50 && tree.y < canvas.height + 50
   )
@@ -32,8 +50,11 @@ export function drawGame(gameState: GameState) {
       tree.height
     )
   })
+}
 
-  // Draw player
+function drawPlayer(gameState: GameState) {
+  const { ctx, player, sprites, playerAngle } = gameState
+  
   ctx.save()
   ctx.translate(player.x + player.width / 2, player.y + player.height / 2)
   ctx.rotate(playerAngle)
@@ -45,9 +66,11 @@ export function drawGame(gameState: GameState) {
     player.height
   )
   ctx.restore()
+}
 
-  // Draw monster
-  const monster = gameState.monster
+function drawMonster(gameState: GameState) {
+  const { ctx, canvas, monster, sprites } = gameState
+  
   if (monster.y > -50 && monster.y < canvas.height + 50) {
     ctx.save()
     ctx.translate(
@@ -64,10 +87,13 @@ export function drawGame(gameState: GameState) {
     )
     ctx.restore()
   }
+}
 
-  // Draw UI
+function drawUI(gameState: GameState) {
+  const { ctx, distance } = gameState
+  
   ctx.fillStyle = '#FFFFFF'
   ctx.font = '20px Arial'
   ctx.textAlign = 'left'
-  ctx.fillText(`Distancia: ${Math.floor(gameState.distance)}m`, 20, 30)
+  ctx.fillText(`Distancia: ${Math.floor(distance)}m`, 20, 30)
 } 

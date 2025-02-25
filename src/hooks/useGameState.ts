@@ -59,6 +59,7 @@ const loadHighScores = (): HighScore[] => {
   return []
 }
 
+// Break down the game state management into smaller, focused hooks and functions
 export const useGameState = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   isStarted: boolean,
@@ -68,8 +69,7 @@ export const useGameState = (
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [spritesLoaded, setSpritesLoaded] = useState(false)
 
-
-  // Initialize game state
+  // Load sprites and initialize game
   useEffect(() => {
     async function initGame() {
       const canvas = canvasRef.current
@@ -79,62 +79,12 @@ export const useGameState = (
       if (!ctx) return
 
       try {
-        const [playerSprite, treeSprite, borderTreeSprite, yetiSprite] = await Promise.all([
-          loadImage(skierSvg),
-          loadImage(treeSvg),
-          loadImage(pineSvg),
-          loadImage(yetiSvg)
-        ])
-
+        // Load sprites
+        const sprites = await loadGameSprites()
         setSpritesLoaded(true)
-
-        const initialState: GameState = {
-          canvas,
-          ctx,
-          player: {
-            x: canvas.width / 2,
-            y: 50,
-            width: 20,
-            height: 30,
-            speed: 2.5,
-          },
-          obstacles: [...INITIAL_OBSTACLES],
-          borderTrees: [...INITIAL_BORDER_TREES],
-          score: 0,
-          hasCollided: false,
-          baseSpeed: 0.5,
-          currentSpeed: 0.5,
-          maxSpeed: 2,
-          acceleration: 0.005,
-          deceleration: 1.5,
-          keys: {
-            left: false,
-            right: false
-          },
-          horizontalSpeed: 0,
-          maxHorizontalSpeed: 8,
-          sprites: {
-            player: playerSprite,
-            tree: treeSprite,
-            borderTree: borderTreeSprite,
-            yeti: yetiSprite
-          },
-          playerAngle: 0,
-          distance: 0,
-          highScores: loadHighScores(),
-          monster: {
-            x: canvas.width / 2,
-            y: -GAME_CONSTANTS.MONSTER_INITIAL_DISTANCE,
-            width: GAME_CONSTANTS.MONSTER_WIDTH,
-            height: GAME_CONSTANTS.MONSTER_HEIGHT,
-            speed: GAME_CONSTANTS.MONSTER_BASE_SPEED,
-            baseSpeed: GAME_CONSTANTS.MONSTER_BASE_SPEED,
-            acceleration: GAME_CONSTANTS.MONSTER_ACCELERATION
-          },
-          gameStatus: 'waiting',
-          playerName: playerName
-        }
-
+        
+        // Initialize game state
+        const initialState = createInitialGameState(canvas, ctx, sprites, playerName)
         setGameState(initialState)
       } catch (error) {
         console.error('Error loading game assets:', error)
@@ -147,15 +97,10 @@ export const useGameState = (
   // Handle game status changes
   useEffect(() => {
     if (!gameState || !spritesLoaded) return
-
-    const currentStatus = gameState.gameStatus
-    const newStatus: GameStatus = 
-      !isStarted ? 'waiting' :
-      isPaused ? 'paused' :
-      currentStatus === 'lost' ? currentStatus :
-      'playing'
-
-    if (newStatus !== currentStatus) {
+    
+    const newStatus = determineGameStatus(isStarted, isPaused, gameState.gameStatus)
+    
+    if (newStatus !== gameState.gameStatus) {
       setGameState(prev => ({
         ...prev!,
         gameStatus: newStatus
@@ -164,4 +109,96 @@ export const useGameState = (
   }, [isStarted, isPaused, spritesLoaded, gameState])
 
   return [gameState, setGameState]
+}
+
+// Helper functions 
+async function loadGameSprites(): Promise<{
+  player: HTMLImageElement,
+  tree: HTMLImageElement,
+  borderTree: HTMLImageElement,
+  yeti: HTMLImageElement
+  }> {
+  const [playerSprite, treeSprite, borderTreeSprite, yetiSprite] = await Promise.all([
+    loadImage(skierSvg),
+    loadImage(treeSvg),
+    loadImage(pineSvg),
+    loadImage(yetiSvg)
+  ])
+  
+  return {
+    player: playerSprite,
+    tree: treeSprite,
+    borderTree: borderTreeSprite,
+    yeti: yetiSprite
+  }
+}
+
+function createInitialGameState(
+  canvas: HTMLCanvasElement, 
+  ctx: CanvasRenderingContext2D,
+  sprites: {
+    player: HTMLImageElement,
+    tree: HTMLImageElement,
+    borderTree: HTMLImageElement,
+    yeti: HTMLImageElement
+  },
+  playerName: string
+): GameState {
+  return {
+    canvas,
+    ctx,
+    player: createPlayerState(canvas),
+    obstacles: [...INITIAL_OBSTACLES],
+    borderTrees: [...INITIAL_BORDER_TREES],
+    score: 0,
+    hasCollided: false,
+    baseSpeed: 0.5,
+    currentSpeed: 0.5,
+    maxSpeed: 2,
+    acceleration: 0.005,
+    deceleration: 1.5,
+    keys: { left: false, right: false },
+    horizontalSpeed: 0,
+    maxHorizontalSpeed: 8,
+    sprites,
+    playerAngle: 0,
+    distance: 0,
+    highScores: loadHighScores(),
+    monster: createMonsterState(canvas),
+    gameStatus: 'waiting',
+    playerName
+  }
+}
+
+function createPlayerState(canvas: HTMLCanvasElement) {
+  return {
+    x: canvas.width / 2,
+    y: 50,
+    width: 20,
+    height: 30,
+    speed: 2.5,
+  }
+}
+
+function createMonsterState(canvas: HTMLCanvasElement) {
+  return {
+    x: canvas.width / 2,
+    y: -GAME_CONSTANTS.MONSTER_INITIAL_DISTANCE,
+    width: GAME_CONSTANTS.MONSTER_WIDTH,
+    height: GAME_CONSTANTS.MONSTER_HEIGHT,
+    speed: GAME_CONSTANTS.MONSTER_BASE_SPEED,
+    baseSpeed: GAME_CONSTANTS.MONSTER_BASE_SPEED,
+    acceleration: GAME_CONSTANTS.MONSTER_ACCELERATION
+  }
+}
+
+function determineGameStatus(
+  isStarted: boolean, 
+  isPaused: boolean, 
+  currentStatus: GameStatus
+): GameStatus {
+  if (!isStarted) return 'waiting'
+  if (isPaused) return 'paused'
+  if (currentStatus === 'lost') return currentStatus
+  return 'playing'
 } 

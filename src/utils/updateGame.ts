@@ -7,9 +7,32 @@ export function updateGame(
 ) {
   if (gameState.gameStatus !== 'playing') return
 
-  // Handle horizontal movement with acceleration
-  const acceleration = 0.1
-  const friction = 0.85
+  // Handle movement
+  updatePlayerMovement(gameState);
+  updatePlayerPosition(gameState);
+  updateTrees(gameState);
+
+  if (!gameState.hasCollided) {
+    gameState.player.y = Math.min(
+      gameState.canvas.height - 200,  
+      gameState.player.y + gameState.currentSpeed * 0.03  
+    )
+  }
+
+
+  generateObstacleTrees(gameState);
+  generateBorderTrees(gameState);
+
+  updateScoreAndDistance(gameState);
+  updatePlayerAngle(gameState);
+  updateMonster(gameState, setGameState);
+}
+
+// Helper functions
+
+function updatePlayerMovement(gameState: GameState) {
+  const acceleration = 0.1;
+  const friction = 0.85;
 
   if (gameState.keys.left) {
     gameState.horizontalSpeed = Math.max(
@@ -28,8 +51,9 @@ export function updateGame(
   if (!gameState.keys.left && !gameState.keys.right) {
     gameState.horizontalSpeed *= friction
   }
+}
 
-  // Update player position with bounds checking (now using margins)
+function updatePlayerPosition(gameState: GameState) {
   gameState.player.x = Math.max(
     GAME_CONSTANTS.PLAYABLE_MARGIN_X,
     Math.min(
@@ -37,8 +61,10 @@ export function updateGame(
       gameState.player.x + gameState.horizontalSpeed
     )
   )
+}
 
-  // Move all trees (both obstacles and border trees)
+function updateTrees(gameState: GameState) {
+  // Move all trees
   gameState.obstacles = gameState.obstacles.map(obstacle => ({
     ...obstacle,
     y: obstacle.y - gameState.currentSpeed
@@ -49,18 +75,20 @@ export function updateGame(
     y: tree.y - gameState.currentSpeed
   }))
 
-  // Clean up off-screen trees more aggressively
+  // Clean up off-screen trees
   gameState.obstacles = gameState.obstacles.filter(
     obstacle => obstacle.y > -100 && obstacle.y < gameState.canvas.height + 200
   )
   gameState.borderTrees = gameState.borderTrees.filter(
     tree => tree.y > -100 && tree.y < gameState.canvas.height + 200
   )
+}
 
-  // Generate new trees only when needed
-  const minTrees = 15
+function generateObstacleTrees(gameState: GameState) {
+  // Generate new obstacle trees
+  const minTrees = 15 + Math.floor(gameState.distance / 60);
   if (gameState.obstacles.length < minTrees) {
-    const treesToAdd = Math.min(3, minTrees - gameState.obstacles.length)
+    const treesToAdd = Math.min(5, minTrees - gameState.obstacles.length);
     
     for (let i = 0; i < treesToAdd; i++) {
       const baseX = GAME_CONSTANTS.PLAYABLE_MARGIN_X + 
@@ -75,9 +103,11 @@ export function updateGame(
       })
     }
   }
+}
 
-  // Generate border trees more efficiently
-  const minBorderTrees = 40
+function generateBorderTrees(gameState: GameState) {
+  // Generate border trees
+  const minBorderTrees = 50;
   if (gameState.borderTrees.length < minBorderTrees) {
     for (let side = 0; side < 2; side++) {
       const baseX = side === 0 ? 0 : gameState.canvas.width - GAME_CONSTANTS.PLAYABLE_MARGIN_X
@@ -91,22 +121,14 @@ export function updateGame(
       })
     }
   }
+}
 
-  // Move player down slowly when not colliding
-  if (!gameState.hasCollided) {
-    gameState.player.y = Math.min(
-      gameState.canvas.height - 100,
-      gameState.player.y + gameState.currentSpeed * 0.1
-    )
-  }
-
-  // Update score based on current speed
+function updateScoreAndDistance(gameState: GameState) {
   gameState.score += gameState.currentSpeed
-
-  // Actualizar distancia basada en la velocidad actual
   gameState.distance += gameState.currentSpeed * SCORE_CONSTANTS.DISTANCE_MULTIPLIER
+}
 
-  // Inside updateGame, update the player angle based on movement
+function updatePlayerAngle(gameState: GameState) {
   if (gameState.keys.left) {
     gameState.playerAngle = Math.max(
       -GAME_CONSTANTS.MAX_ROTATION,
@@ -118,53 +140,56 @@ export function updateGame(
       gameState.playerAngle + GAME_CONSTANTS.PLAYER_ROTATION_SPEED
     )
   } else {
-    // Return to center
     gameState.playerAngle *= 0.9
   }
+}
 
-  // Actualizar posición del monstruo
+function updateMonster(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState | null>>) {
   const monster = gameState.monster
   
-  // Velocidad base del monstruo independiente de la velocidad del jugador
+  const playerSpeedFactor = gameState.currentSpeed / gameState.maxSpeed;
+  
+  // Calculate target speed - slower than player when player is at full speed
   const targetSpeed = Math.min(
-    gameState.baseSpeed * 1.2, // Basado en la velocidad base, no la actual
-    monster.baseSpeed + (gameState.distance * 0.0001) // Aumenta gradualmente con la distancia
+    gameState.baseSpeed * 1.1,
+    monster.baseSpeed + (gameState.distance * 0.0001)
   )
+  const monsterSpeedMultiplier = 
+    playerSpeedFactor < 0.7 ? 1 : 0.9;
 
-  // Acelerar/decelerar el monstruo más suavemente
-  monster.speed = monster.speed + (targetSpeed - monster.speed) * 0.1
+  monster.speed = monster.speed + (targetSpeed * monsterSpeedMultiplier - monster.speed) * 0.05;
 
-  // Mover el monstruo hacia el jugador con más precisión
   const dx = gameState.player.x - monster.x
   monster.x += dx * GAME_CONSTANTS.MONSTER_HORIZONTAL_FOLLOW
 
-  // Movimiento vertical del monstruo (ahora independiente de colisiones)
   if (monster.y < gameState.player.y - 200) {
-    monster.y += monster.speed * 2 // Acelera más cuando está muy atrás
+    monster.y += monster.speed * 2
   } else if (monster.y > gameState.player.y - 100) {
-    monster.y += monster.speed * 0.7 // Desacelera menos cuando está cerca
+    monster.y += monster.speed * 0.7
   } else {
-    monster.y += monster.speed * 1.2 // Velocidad normal más alta
+    monster.y += monster.speed;
   }
 
-  // Verificar colisión con el monstruo (hitbox más precisa)
+  // Check for collision with monster
+  checkMonsterCollision(gameState, setGameState);
+}
+
+function checkMonsterCollision(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState | null>>) {
+  const monster = gameState.monster;
+  
   const monsterHitbox = {
-    x: monster.x + monster.width * 0.2,
     y: monster.y + monster.height * 0.2,
     width: monster.width * 0.6,
     height: monster.height * 0.6
   }
 
   const playerHitbox = {
-    x: gameState.player.x + gameState.player.width * 0.2,
     y: gameState.player.y + gameState.player.height * 0.2,
     width: gameState.player.width * 0.6,
     height: gameState.player.height * 0.6
   }
 
   if (
-    playerHitbox.x < monsterHitbox.x + monsterHitbox.width &&
-    playerHitbox.x + playerHitbox.width > monsterHitbox.x &&
     playerHitbox.y < monsterHitbox.y + monsterHitbox.height &&
     playerHitbox.y + playerHitbox.height > monsterHitbox.y
   ) {
@@ -177,6 +202,5 @@ export function updateGame(
       handleGameOver(updatedState);
       return updatedState;
     });
-    return;
   }
 } 
